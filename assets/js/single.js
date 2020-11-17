@@ -1,5 +1,13 @@
 var issuesContainerEl = document.querySelector("#issues-container");
 var limitWarningEl = document.querySelector("#limit-warning")
+var repoNameEl = document.querySelector("#repo-name")
+
+var getRepoName = function () {
+    var queryString = document.location.search;
+    repoName = queryString.split("=")[1];
+    getRepoIssues(repoName);
+    repoNameEl.textContent = repoName;
+}
 
 var getRepoIssues = function (repo) {
 
@@ -28,7 +36,7 @@ var displayIssues = function (issues) {
         issuesContainerEl.textContent = "This repo has no open issues!";
         return;
     }
-    for(i=0; i < issues.length; i++) {
+    for (i = 0; i < issues.length; i++) {
         //create a link element to take the user to the issue on github
         var issueEl = document.createElement("a")
         issueEl.classList = "list-item flex-row justify-space-between align-center"
@@ -44,7 +52,7 @@ var displayIssues = function (issues) {
         var typeEl = document.createElement("span")
 
         // check if issues is an actual issue or a pull reequest
-        if(issues[i].pull_request) {
+        if (issues[i].pull_request) {
             typeEl.textContent = "(Pull request)";
         }
         else {
@@ -55,7 +63,7 @@ var displayIssues = function (issues) {
         issueEl.appendChild(typeEl);
 
         issuesContainerEl.appendChild(issueEl);
-    }   
+    }
 
 
 };
@@ -64,12 +72,15 @@ var displayWarning = function (repo) {
     //add text to warning container
     limitWarningEl.textContent = "To see more than 30 issues, visit ";
     //create a link to github repo issues page for repos with more than 30 issues
-        linkEl = document.createElement("a")
-        linkEl.textContent = "See more issues on Github.com";
-        linkEl.setAttribute("href", "https://github.com/" + repo + "/issues")
-        linkEl.setAttribute("target", "_blank")
+    linkEl = document.createElement("a")
+    linkEl.textContent = "See more issues on Github.com";
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues")
+    linkEl.setAttribute("target", "_blank")
 
     //append warning to container
     limitWarningEl.appendChild(linkEl)
 };
-    getRepoIssues("facebook/react")
+
+
+getRepoIssues()
+getRepoName()
