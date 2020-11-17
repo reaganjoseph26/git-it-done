@@ -2,6 +2,7 @@ var userFormEl = document.querySelector("#user-form");
 var nameInputEl = document.querySelector("#username");
 var repoContainerEl = document.querySelector("#repos-container");
 var repoSearchTerm = document.querySelector("#repo-search-term");
+var languageButtonEl = document.querySelector("#language-buttons")
 
 var formSubmitHandler = function (event) {
     event.preventDefault()
@@ -120,5 +121,24 @@ var getFeaturedRepos = function (language) {
     });
 };
 
+var buttonClickHandler = function (event) {
+    var language = event.target.getAttribute("data-language")
+
+    if (language) {
+        getFeaturedRepos(language)
+
+        /*clear old content
+        even though this is wirtten last, it will execute firt because get FeaturedRepos()...
+        is asynchronous and will take longer to get a response from guthub api
+        */
+        repoContainerEl.textContent = ""; 
+    }
+};
+
 userFormEl.addEventListener("submit", formSubmitHandler);
+languageButtonEl.addEventListener("click", buttonClickHandler);
+
 displayRepos()
+
+
+
