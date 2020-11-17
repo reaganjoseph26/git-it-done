@@ -1,14 +1,104 @@
-var getUserRepos = function(user) {
+var userFormEl = document.querySelector("#user-form");
+var nameInputEl = document.querySelector("#username");
+var repoContainerEl = document.querySelector("#repos-container");
+var repoSearchTerm = document.querySelector("#repo-search-term");
+
+var formSubmitHandler = function (event) {
+    event.preventDefault()
+    /* prevents the browser from sending the form's input data to a URL, 
+    as we'll handle what happens with the form input data ourselves in JavaScript.
+    */
+
+    // get value from input element
+    var username = nameInputEl.value.trim();
+
+    if (username) {
+        getUserRepos(username);
+        nameInputEl.value = ""; // clear out the inputs element value when on submit
+    }
+    else {
+        alert("Please enter enter a Github username");
+    }
+    console.log(event);
+};
+
+var getUserRepos = function (user) {
 
     // format the github api url
     var apiUrl = "https://api.github.com/users/" + user + "/repos"
 
     //make a request to the url 
     fetch(apiUrl).then(function (response) {
-        response.json().then(function (data) {
-            console.log(data);
+        //control how the app reacts to user looking up a github user that does not exsist
+        if (response.ok) {
+            response.json().then(function (data) {
+                displayRepos(data, user) //when the response data is converted to JSON, it will be sent from getUserRepos to displayRepos.
+                console.log(data);
+            });
+
+        }
+        else {
+            alert("Error: " + response.statusText);
+        }
+    })
+     .catch(function (error) {
+            // Notice this `.catch()` getting chained onto the end of the `.then()` method
+            alert("Unable to connect to GitHub");
         });
-    });
 };
 
-getUserRepos("facebook")
+// function to display repos
+
+var displayRepos = function (repos, searchTerm) {
+    //check if api returned any arrays 
+    if (repos.length === 0) {
+        repoContainerEl.textContent = "No repositories found.";
+        return;
+    }
+    // clear out old content 
+    repoContainerEl.textContent = "";
+    repoSearchTerm.textContent = searchTerm
+
+    //loop over repos 
+    for (i = 0; i < repos.length; i++) {
+        //format repo name 
+        var repoName = repos[i].owner.login + "/" + repos[i].name;
+
+        // create a container for each repo 
+        var repoEl = document.createElement("div");
+        repoEl.classList = "list-item flex-row justify-space-between align-center";
+
+        // create a span to hold repository name
+        var titleEl = document.createElement("span");
+        titleEl.textContent = repoName
+
+        // append to container 
+        repoEl.appendChild(titleEl);
+
+        // create a status element for the repo issues
+        var statusEl = document.createElement("span");
+        statusEl.classList = "flex-row align-center";
+
+        //check if current issue has repos or not 
+        if (repos[i].open_issues_count > 0) {
+            statusEl.innerHTML =
+                "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + " issue(s)";
+        } else {
+            statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
+        }
+
+        //append to container 
+        repoEl.appendChild(statusEl)
+
+        // append that container to DOM 
+        repoContainerEl.appendChild(repoEl)
+    }
+
+    console.log(repos); // repos is the array or repos from that github user name
+    console.log(searchTerm); // searhterm is github repo name inputed in input field
+
+
+};
+
+userFormEl.addEventListener("submit", formSubmitHandler);
+displayRepos()
